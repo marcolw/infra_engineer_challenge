@@ -1,0 +1,103 @@
+name: Deploy Site to EC2
+
+on:
+  workflow_dispatch:
+    inputs:
+      account_id:
+        description: "AWS Account ID"
+        required: true
+        default: "058264095432"
+      ec2_user:
+        description: "EC2 SSH User"
+        required: true
+        default: "ubuntu" 
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials (OIDC)
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::${{ github.event.inputs.account_id }}:role/GitHubActionsTerraformRole
+        aws-region: ap-southeast-2
+
+    - name: Fetch SSH key from Secrets Manager
+      run: |
+        KEY_CONTENT=$(aws secretsmanager get-secret-value \
+          --secret-id ec2-ssh-private-key \
+          --query SecretString \
+          --output text)
+        
+        echo "$KEY_CONTENT" | sed 's/^"//;s/"$//' | sed 's/\\n/\n/g' > ec2_key.pem
+        chmod 600 ec2_key.pem
+        echo " Key saved in $(pwd)"
+
+    - name: Fetch EC2 public IP using EC2 API
+      run: |
+        IP=$(aws ec2 describe-instances \
+          --filters "Name=tag:Name,Values=infra-challenge-webserver" "Name=instance-state-name,Values=running" \
+          --query "Reservations[0].Instances[0].PublicIpAddress" \
+          --output text)
+        
+        if [ -z "$IP" ] || [ "$IP" = "None" ]; then
+          echo " Could not find EC2 instance IP"
+          exit 1
+        fi
+        
+        echo "EC2_HOST=$IP" >> $GITHUB_ENV
+        echo " Found EC2 IP: $IP"
+
+    - name: Setup SSH connection
+      run: |
+        mkdir -p ~/.ssh
+        chmod 700 ~/.ssh
+        
+        timeout 10s ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts 2>/dev/null || true
+        
+        if [ -f ~/.ssh/known_hosts ]; then
+          chmod 600 ~/.ssh/known_hosts
+          echo " SSH setup completed"
+        else
+          echo " Could not create known_hosts, continuing anyway"
+        fi
+
+    - name: Deploy site to EC2
+      run: |
+        echo " Deploying to $EC2_HOST..."
+        
+        # Test SSH connection
+        ssh -i ec2_key.pem -o StrictHostKeyChecking=no -o ConnectTimeout=5 \
+          ubuntu@$EC2_HOST "echo 'SSH connection successful'"
+        
+        echo " SSH connection verified"
+        
+        # Clean tmp dir on remote
+        ssh -i ec2_key.pem -o StrictHostKeyChecking=no ubuntu@$EC2_HOST \
+          "rm -rf /tmp/mywebsite && mkdir -p /tmp/mywebsite"
+        
+        # Rsync files to remote dir
+        rsync -avz -e "ssh -i ec2_key.pem -o StrictHostKeyChecking=no -o ConnectTimeout=10" \
+          --delete --exclude 'ec2_key.pem' ./ ubuntu@$EC2_HOST:/tmp/mywebsite/
+        
+        # Move files with sudo
+        ssh -i ec2_key.pem -o StrictHostKeyChecking=no ubuntu@$EC2_HOST "\
+          sudo rsync -avz --delete /tmp/mywebsite/ /var/www/html/ && \
+          sudo chown -R www-data:www-data /var/www/html/"
+        
+        # Restart nginx
+        ssh -i ec2_key.pem -o StrictHostKeyChecking=no ubuntu@$EC2_HOST \
+          "sudo systemctl restart nginx"
+        
+        echo " Deployment completed successfully!"

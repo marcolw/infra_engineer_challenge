@@ -1,0 +1,58 @@
+# on:
+#   push:
+#     branches:
+#       - main
+#     paths:
+#       - 'infra/**'
+name: Terraform Infra Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      terraform_version:
+        description: "Terraform version to use"
+        required: false
+        default: "1.13.1"
+      account_id:
+        description: "AWS Account ID"
+        required: true
+        default: "058264095432"  # UPDATE THIS
+
+permissions:
+  id-token: write   # Required for OIDC
+  contents: read    # Checkout code
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: infra
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ github.event.inputs.account_id }}:role/GitHubActionsTerraformRole
+          aws-region: ap-southeast-2
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ github.event.inputs.terraform_version }}
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
