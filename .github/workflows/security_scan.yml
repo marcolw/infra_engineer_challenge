@@ -23,13 +23,13 @@ jobs:
         with:
           working_directory: './infra'
           soft_fail: true
-          additional_args: '--format sarif --out ../tfsec-results.sarif'
+          additional_args: '--format sarif --out tfsec-results.sarif'
 
       - name: Upload tfsec results to GitHub
         if: github.event_name == 'pull_request'
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: tfsec-results.sarif
+          sarif_file: infra/tfsec-results.sarif
 
       - name: Shell Script Security Scan
         run: |
