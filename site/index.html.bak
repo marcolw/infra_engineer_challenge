@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> Infra Deployment Challenge </title>
+  <style>
+    body {
+      font-family: "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #1d3557, #457b9d);
+      color: #f1faee;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+    }
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 300;
+      margin-bottom: 2rem;
+    }
+    .button {
+      display: inline-block;
+      padding: 12px 24px;
+      background: #e63946;
+      color: #fff;
+      font-size: 1.2rem;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+    .button:hover {
+      background: #d62828;
+    }
+    footer {
+      margin-top: auto;
+      padding: 1rem;
+      font-size: 0.9rem;
+      color: #a8dadc;
+    }
+  </style>
+</head>
+<body>
+  <h1> Site Sync Successful</h1>
+  <h2>Deployed via GitHub Actions → AWS EC2 → Nginx</h2>
+  <a class="button" href="#">Explore More</a>
+  <footer> 2025 Xenium Solution • Powered by Marco’s Automation</footer>
+</body>
+</html>
