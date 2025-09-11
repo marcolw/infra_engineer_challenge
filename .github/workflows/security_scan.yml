@@ -19,16 +19,18 @@ jobs:
         run: npm install -g htmlhint
 
       - name: Terraform Security Scan
-        uses: aquasecurity/tfsec-action@v1.0.0
+        uses: aquasecurity/tfsec-action@main
         with:
           working_directory: './infra'
           soft_fail: ${{ github.event_name == 'push' }}
-          format: sarif
-          output_file: tfsec-results.sarif
+          #tfsec_args: --format sarif --out tfsec-results.sarif
+          sarif_file: tfsec-results.sarif
+          #format: sarif
+          #output_file: tfsec-results.sarif
 
       - name: Upload tfsec results to GitHub
-        uses: github/codeql-action/upload-sarif@v2
         if: github.event_name == 'pull_request'
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: tfsec-results.sarif
 
