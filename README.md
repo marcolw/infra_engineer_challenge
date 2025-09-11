@@ -50,5 +50,5 @@ Demonstrate skills and approach to Infrastructure Engineering
 ## Production-ready enhancement
 - Modularize Terraform with values file for multiple environments.
 - Containerize multi layer and deploy to EKS behind ALB (supports dynamic workload).
-- Adopt GitFlow branching strategy for colaborative environment: branch protection, approval gate and automated tests.
+- Adopt GitFlow branching strategy for collaborative environment: branch protection, approval gate and automated tests.
 - Observability: Prometheus(metric), Grafana, Tempo (traces), logging (Loki/ELK).
