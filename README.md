@@ -52,4 +52,4 @@ Demonstrate skills and approach to Infrastructure Engineering
 - Modularize Terraform with values file for multiple environments.
 - Containerize multi layer and deploy to EKS behind ALB (supports dynamic workload).
 - Adopt GitFlow branching strategy for collaborative environment: branch protection, approval gate and automated tests.
-- Observability: Prometheus(metric), Grafana, Tempo (traces), logging (Loki/ELK), supporting microservice architecture.
+- Observability: Prometheus(metric), Grafana, Tempo (traces), logging (Loki), supporting microservice architecture.
