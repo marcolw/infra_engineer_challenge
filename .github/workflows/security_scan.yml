@@ -19,14 +19,11 @@ jobs:
         run: npm install -g htmlhint
 
       - name: Terraform Security Scan
-        uses: aquasecurity/tfsec-action@main
+        uses: aquasecurity/tfsec-action@v1.0.3
         with:
           working_directory: './infra'
           soft_fail: true
-          #tfsec_args: --format sarif --out tfsec-results.sarif
-          sarif_file: tfsec-results.sarif
-          #format: sarif
-          #output_file: tfsec-results.sarif
+          additional_args: '--format sarif --out ../tfsec-results.sarif'
 
       - name: Upload tfsec results to GitHub
         if: github.event_name == 'pull_request'
