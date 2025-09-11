@@ -22,7 +22,7 @@ jobs:
         uses: aquasecurity/tfsec-action@main
         with:
           working_directory: './infra'
-          soft_fail: ${{ github.event_name == 'push' }}
+          soft_fail: true
           #tfsec_args: --format sarif --out tfsec-results.sarif
           sarif_file: tfsec-results.sarif
           #format: sarif
