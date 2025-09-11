@@ -1,8 +1,7 @@
 name: Security Scanning
 
 on:
-#   push:
-#     branches: [ main, develop ]
+  push: {}
   pull_request:
     branches: [ main ]
 
