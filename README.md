@@ -21,19 +21,20 @@ Demonstrate skills and approach to Infrastructure Engineering
 - `.github/workflows/`: GitHub Actions workflows for building infrastructure and deploying the site.
 
 ## How to reproduce
-1. Clone repo: git clone https://github.com/marcolw/infra_engineer_challenge.git
-2. Authenticate with AWS (SSO or temporary Access Keys).
-3. Bootstrap Terraform backend & OIDC:
+1. Folk this repo: git clone https://github.com/marcolw/infra_engineer_challenge.git
+2. Clone to local.
+3. Authenticate with AWS (SSO or temporary Access Keys).
+4. Bootstrap Terraform backend & OIDC:
    - Run: scripts/bootstrap.sh. (update $BUCKET in the script with random bucket name)
    - Trigger "Terraform Build" GHA pipeline to provision EC2,Networking and assolicate objects for website.
    - Retrieve Public IP from Terraform output, update your DNS A record (e.g., demo domain:infra.xeniumsolution.space).
    - Once A record propagates, run scripts/run-certbot.sh against EC2 instance to enable https.
-4. Access infra.xeniumsolution.space or your domain name for verification.
-5. Update Website contents:
+5. Access infra.xeniumsolution.space or your domain name for verification.
+6. Update Website contents:
    - Update files in site/ folders, Commit & Push to remote main branch.
    - Trigger "Deploy Site to EC2" GHA pipeline to sync contents to EC2 nginx webserver.
    - Refresh website for verification (infra.xeniumsolution.space)
-6. Clean up:
+7. Clean up:
    - Trigger "Terraform Destroy" pipeline to remove infrastructure resources, providing your target AWS account ID.
    - Run local cneanup: scripts/cleanup.sh to remove bootstrapped resources。
 
