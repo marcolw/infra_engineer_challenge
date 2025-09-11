@@ -1,0 +1,49 @@
+name: Security Scanning
+
+on:
+  push: {}
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  security-scan:
+    if: |
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'push' && !github.event.pull_request)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install HTMLHint
+        run: npm install -g htmlhint
+
+      - name: Terraform Security Scan
+        uses: aquasecurity/tfsec-action@v1.0.0
+        with:
+          working_directory: './infra'
+          soft_fail: ${{ github.event_name == 'push' }}
+          format: sarif
+          output_file: tfsec-results.sarif
+
+      - name: Upload tfsec results to GitHub
+        uses: github/codeql-action/upload-sarif@v2
+        if: github.event_name == 'pull_request'
+        with:
+          sarif_file: tfsec-results.sarif
+
+      - name: Shell Script Security Scan
+        run: |
+          find . -name "*.sh" -exec shellcheck {} \;
+        continue-on-error: ${{ github.event_name == 'push' }}
+
+      - name: HTML Security Scan
+        run: |
+          htmlhint "site/**/*.html" --config .htmlhintrc
+        continue-on-error: ${{ github.event_name == 'push' }}
+
+      - name: Fail build on security issues (PR only)
+        if: github.event_name == 'pull_request' && failure()
+        run: |
+          echo "❌ Security scans failed - blocking merge"
+          exit 1
