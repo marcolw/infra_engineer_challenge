@@ -27,3 +27,4 @@ output "ssm_command" {
   description = "Command to connect via SSM Session Manager"
   value       = "aws ssm start-session --target ${aws_instance.web.id}"
 }
+
