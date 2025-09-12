@@ -2,7 +2,7 @@
 Demonstrate skills and approach to Infrastructure Engineering
 
 **Repository:** https://github.com/marcolw/infra_engineer_challenge.git  
-**Domain:** infra.xeniumsolution.space ( https error due to too many certificates already issued, will rectify later)
+**Domain:** infra.xeniumsolution.space
 
 ## Highlights
 
