@@ -22,7 +22,7 @@ jobs:
         uses: aquasecurity/tfsec-action@v1.0.3
         with:
           working_directory: './infra'
-          soft_fail: ${{ github.event_name == 'push' }}
+          soft_fail: false
           additional_args: '--format sarif --out tfsec-results.sarif'
 
       - name: Upload tfsec results to GitHub
