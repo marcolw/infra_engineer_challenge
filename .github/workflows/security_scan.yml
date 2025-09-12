@@ -4,16 +4,30 @@ on:
   #push: {}
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      upload:
+        description: "Upload results to GitHub (true/false)"
+        type: boolean
+        required: true
+        default: true
 
 jobs:
   security-scan:
-    if: |
-      github.event_name == 'pull_request' ||
-      (github.event_name == 'push' && !github.event.pull_request)
+    # if: |
+    #   github.event_name == 'pull_request' ||
+    #   (github.event_name == 'push' && !github.event.pull_request)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Debug GitHub context
+        run: |
+          echo "Event name: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Event action: ${{ github.event.action }}"
+          echo "PR number: ${{ github.event.pull_request.number }}"    
 
       - name: Install HTMLHint
         run: npm install -g htmlhint
@@ -22,11 +36,14 @@ jobs:
         uses: aquasecurity/tfsec-action@v1.0.3
         with:
           working_directory: './infra'
-          soft_fail: false
-          additional_args: '--format sarif --out tfsec-results.sarif'
+          format: 'sarif'
+          additional_args: '-O tfsec-results.sarif --concise-output'
+        continue-on-error: ${{ github.event_name != 'pull_request' }}
 
       - name: Upload tfsec results to GitHub
-        if: github.event_name == 'pull_request'
+        # if: |
+        #   (github.event_name == 'pull_request') ||
+        #   (github.event_name == 'workflow_dispatch' && github.event.inputs.upload == 'true')
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: tfsec-results.sarif
@@ -34,15 +51,15 @@ jobs:
       - name: Shell Script Security Scan
         run: |
           find . -name "*.sh" -exec shellcheck {} \;
-        continue-on-error: ${{ github.event_name == 'push' }}
+        # continue-on-error: ${{ github.event_name == 'push' }}
 
       - name: HTML Security Scan
         run: |
           htmlhint "site/**/*.html" --config .htmlhintrc
-        continue-on-error: ${{ github.event_name == 'push' }}
+        # continue-on-error: ${{ github.event_name == 'push' }}
 
       - name: Fail build on security issues (PR only)
         if: github.event_name == 'pull_request' && failure()
         run: |
-          echo "❌ Security scans failed - blocking merge"
+          echo " Security scans failed - blocking merge"
           exit 1
