@@ -36,6 +36,8 @@ jobs:
 
       - name: Terraform Security Scan
         uses: aquasecurity/tfsec-action@v1.0.3
+        env:
+          ACTIONS_STEP_DEBUG: false 
         with:
           working_directory: './infra'
           additional_args: '-O tfsec-results.sarif'
