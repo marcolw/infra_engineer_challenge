@@ -38,7 +38,7 @@ jobs:
         uses: aquasecurity/tfsec-action@v1.0.3
         with:
           working_directory: './infra'
-          additional_args: '-O tfsec-results.sarif'
+          additional_args: '-O tfsec-results.sarif  --no-color'
         continue-on-error: ${{ github.event_name != 'pull_request' }}
 
       - name: Upload tfsec results to GitHub
