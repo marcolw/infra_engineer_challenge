@@ -17,6 +17,8 @@ jobs:
     # if: |
     #   github.event_name == 'pull_request' ||
     #   (github.event_name == 'push' && !github.event.pull_request)
+    permissions:
+      security-events: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
