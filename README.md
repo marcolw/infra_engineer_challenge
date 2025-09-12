@@ -2,7 +2,7 @@
 Demonstrate skills and approach to Infrastructure Engineering
 
 **Repository:** https://github.com/marcolw/infra_engineer_challenge.git  
-**Domain:** infra.xeniumsolution.space ( https error due to too many certificates already issued, will rectify after 2025-09-11 22:39:38 UTC )
+**Domain:** infra.xeniumsolution.space ( https error due to too many certificates already issued, will rectify later)
 
 ## Highlights
 
@@ -13,6 +13,7 @@ Demonstrate skills and approach to Infrastructure Engineering
 -  Automated TLS: Certbot for HTTPS provisioning and renewal.
 -  CI/CD Pipeline: Automated pipelines for provisioning and website deployment to AWS account.
 -  Ongoing Deployment: Push-to-deploy workflow for updating website content.
+-  Add security scans pipeline: tfsec for terraform IaC, ShellCheck for Bashshell, HTMLHint for static.(20250912)
 
 ## What this repo contains
 - `site/`: Static site source. The home page displays: **"This is Marco Liao's website"**.
@@ -40,7 +41,6 @@ Demonstrate skills and approach to Infrastructure Engineering
 
 ## What else I would do with more time
 - Integrate ACM + Route53 for simpler HTTPS + DNS automation.
-- Add security scans in pipelines (e.g., tfsec for IaC, ShellCheck for Bashshell, HTMLHint for static).
 - Provision monitoring resources(CloudWatch) via Terraform.
 - Apply least privilege to GitHub Actions OIDC IAM role.
 
