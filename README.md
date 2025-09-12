@@ -13,7 +13,7 @@ Demonstrate skills and approach to Infrastructure Engineering
 -  Automated TLS: Certbot for HTTPS provisioning and renewal.
 -  CI/CD Pipeline: Automated pipelines for provisioning and website deployment to AWS account.
 -  Ongoing Deployment: Push-to-deploy workflow for updating website content.
--  Add security scans pipeline: tfsec for terraform IaC, ShellCheck for Bashshell, HTMLHint for static.(20250912)
+-  Add security scans pipeline: tfsec for terraform IaC, ShellCheck for Bashshell, HTMLHint for static. Enforce PR and scan on main branch. (20250912)
 
 ## What this repo contains
 - `site/`: Static site source. The home page displays: **"This is Marco Liao's website"**.
