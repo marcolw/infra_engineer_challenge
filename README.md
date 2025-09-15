@@ -14,6 +14,7 @@ Demonstrate skills and approach to Infrastructure Engineering
 -  CI/CD Pipeline: Automated pipelines for provisioning and website deployment to AWS account.
 -  Ongoing Deployment: Push-to-deploy workflow for updating website content.
 -  Add security scans pipeline: tfsec for terraform IaC, ShellCheck for Bashshell, HTMLHint for static. Enforce PR and scan on main branch. (20250912)
+-  Add Terraform code for CloudFront + S3 implementation. (20250915)
 
 ## What this repo contains
 - `site/`: Static site source. The home page displays: **"This is Marco Liao's website"**.
@@ -46,7 +47,7 @@ Demonstrate skills and approach to Infrastructure Engineering
 
 ## Alternative solutions consideration
 - EC2 Auto Scaling + ALB for high availability (trade-off: higher cost, more setup).
-- CloudFront + S3 for scalable static site hosting. (Scalability)
+- CloudFront + S3 for static site hosting. (Scalability)
 
 ## Production-ready enhancement
 - Modularize Terraform with values file for multiple environments.

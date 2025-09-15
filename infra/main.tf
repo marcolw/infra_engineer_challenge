@@ -16,7 +16,6 @@ terraform {
     bucket         = "infra-terraform-state-20250910"  # UPDATE THIS (must be globally unique)
     key            = "infra/terraform.tfstate"
     region         = "ap-southeast-2"
-    # dynamodb_table = "terraform-locks"
     use_lockfile = true 
     encrypt        = true
   }

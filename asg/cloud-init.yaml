@@ -1,0 +1,67 @@
+#cloud-config
+package_update: true
+package_upgrade: true
+
+packages:
+- nginx
+- certbot
+- python3-certbot-nginx
+
+write_files:
+- path: /var/www/html/index.html
+  content: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Marco Liao's Website</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            h1 { color: #2c5282; }
+        </style>
+    </head>
+    <body>
+        <h1>This is Marco Liao's website</h1>
+        <p>Infrastructure Engineering Challenge Solution</p>
+    </body>
+    </html>
+  owner: www-data:www-data
+  permissions: '0644'
+
+- path: /etc/nginx/sites-available/default
+  content: |
+    server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+        
+        root /var/www/html;
+        index index.html;
+        
+        server_name infra.xeniumsolution.space;
+        
+        location ~ /\.well-known/acme-challenge {
+            allow all;
+            root /var/www/html;
+        }
+        
+        location / {
+            try_files $uri $uri/ =404;
+        }
+    }
+  owner: root:root
+  permissions: '0644'
+
+runcmd:
+- nginx -t
+- systemctl restart nginx
+- systemctl enable nginx
+- systemctl enable amazon-ssm-agent
+- systemctl start amazon-ssm-agent
+- |
+  
+  sleep 30
+
+  certbot --nginx -d infra.xeniumsolution.space \
+    --non-interactive --agree-tos -m marco.w.liew@gmail.com \
+    --redirect || echo "Certbot may have failed, but continuing..."
+- echo "0 3 * * * root certbot renew --quiet --no-self-upgrade" >> /etc/crontab
+- echo "Cloud-init completed at $(date)" >> /var/log/user-data.log

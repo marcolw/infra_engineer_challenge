@@ -1,0 +1,67 @@
+name: Deploy Site to Multi-Team AWS Accounts
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment (dev, stage, prod)"
+        required: true
+        default: "dev"
+      version:
+        description: "App version (e.g., v1.2.3)"
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    # Create a matrix of teams dynamically
+    strategy:
+      matrix:
+        team: [ cyber, infra, finance, security, pmo ]
+        # environment: [dev, stage, prod] # could also fanout on environment if needed
+
+    environment: ${{ github.event.inputs.environment }} # binds to GitHub environment
+    name: Deploy ${{ github.event.inputs.version }} to ${{ matrix.team }}-${{ github.event.inputs.environment }}
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Determine AWS Account ID for team + environment
+      id: account
+      run: |
+        # You can store mapping in repo (accounts.json) or use environment vars
+        cat <<EOF > accounts.json
+        {
+          "cyber": {"dev": "111111111111", "stage": "111111111112", "prod": "111111111113"},
+          "infra": {"dev": "222222222221", "stage": "222222222222", "prod": "222222222223"},
+          "finance": {"dev": "333333333331", "stage": "333333333332", "prod": "333333333333"},
+          "security": {"dev": "444444444441", "stage": "444444444442", "prod": "444444444443"},
+          "pmo": {"dev": "555555555551", "stage": "555555555552", "prod": "555555555553"}
+        }
+        EOF
+
+        TEAM=${{ matrix.team }}
+        ENV=${{ github.event.inputs.environment }}
+        ACCOUNT_ID=$(jq -r --arg team "$TEAM" --arg env "$ENV" '.[$team][$env]' accounts.json)
+
+        echo "AWS_ACCOUNT_ID=$ACCOUNT_ID" >> $GITHUB_ENV
+        echo "Team: $TEAM | Env: $ENV | Account ID: $ACCOUNT_ID"
+
+    - name: Configure AWS credentials (OIDC)
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActionsTerraformRole
+        aws-region: ap-southeast-2
+
+    - name: Deploy website to EC2
+      run: |
+        echo "🚀 Deploying ${{ github.event.inputs.version }} to team=${{ matrix.team }} env=${{ github.event.inputs.environment }} (account=${{ env.AWS_ACCOUNT_ID }})"
+        # Insert your deploy logic here:
+        # terraform apply -var-file=env/${{ github.event.inputs.environment }}.tfvars -auto-approve
+        # or rsync website content, etc.
