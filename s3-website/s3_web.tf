@@ -91,11 +91,14 @@ resource "aws_acm_certificate" "ssl_cert" {
 }
 
 # CloudFront Distribution
+# CloudFront Distribution (CORRECTED)
 resource "aws_cloudfront_distribution" "website" {
   origin {
-    domain_name = aws_s3_bucket_website_configuration.website.website_endpoint
+    # CORRECTION: Use the regional S3 website endpoint format
+    domain_name = "${aws_s3_bucket.website.bucket}.s3-website-ap-southeast-2.amazonaws.com"
     origin_id   = "S3-Website-${aws_s3_bucket.website.id}"
 
+    # You MUST use custom_origin_config with website endpoints
     custom_origin_config {
       http_port              = 80
       https_port             = 443
@@ -115,17 +118,11 @@ resource "aws_cloudfront_distribution" "website" {
     cached_methods   = ["GET", "HEAD"]
     target_origin_id = "S3-Website-${aws_s3_bucket.website.id}"
 
-    forwarded_values {
-      query_string = false
-      cookies {
-        forward = "none"
-      }
-    }
+    # Updated to use a managed cache policy (modern best practice)
+    cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6" # Managed Policy: 'CachingOptimized'
 
+    compress               = true
     viewer_protocol_policy = "redirect-to-https"
-    min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
   }
 
   price_class = "PriceClass_All"
@@ -137,7 +134,7 @@ resource "aws_cloudfront_distribution" "website" {
   }
 
   viewer_certificate {
-    acm_certificate_arn      = aws_acm_certificate.ssl_cert.arn
+    acm_certificate_arn      = aws_acm_certificate.ssl_cert.arn # This now works since cert is validated
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
   }

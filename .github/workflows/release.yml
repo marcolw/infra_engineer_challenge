@@ -1,0 +1,34 @@
+# .github/workflows/release.yml
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ github.ref_name }}
+          body: |
+            ## What's Changed
+            - Feature A implemented
+            - Bug B fixed
+            - Performance improvements
+            
+            **Full Changelog**: https://github.com/${{ github.repository }}/compare/v1.0.0...${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: |
+            terraform/*.tf
+            site/*.html
+            site/*.css
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
